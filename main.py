@@ -23,22 +23,25 @@ def serial_ports():
                 s = serial.Serial(port)
                 s.close()
                 result = port
-        except (OSError, serial.SerialException):
+        except:
             pass
     return result
 
-activeserial = serial_ports()
-print(activeserial)
-ser = serial.Serial(activeserial, 9600, timeout=0.01)
-
-
 while True:
-    read_data = ser.read(0x100)
-    if(len(read_data) >= 3):
-        print(read_data)
-    if str(read_data) == "b'hit'":
-        messageToSend = "done"
-        print(messageToSend)
-        ser.write(messageToSend.encode())
-    else:
-        pass
+    activeserial = serial_ports()
+
+    if(activeserial != 0):
+        print(activeserial)
+        ser = serial.Serial(activeserial, 9600, timeout=0.01)
+
+
+        while True:
+            read_data = ser.read(0x100)
+            if(len(read_data) >= 3):
+                print(read_data)
+            if str(read_data) == "b'hit'":
+                messageToSend = "done"
+                print(messageToSend)
+                ser.write(messageToSend.encode())
+            else:
+                pass
