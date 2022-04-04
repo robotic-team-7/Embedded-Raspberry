@@ -2,6 +2,8 @@ import serial
 import sys
 import glob
 
+from camera import takePicture
+
 def serial_ports():
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
@@ -41,7 +43,9 @@ while True:
                 print(read_data)
             if str(read_data) == "b'hit'":
                 messageToSend = "done"
+                takePicture()
                 print(messageToSend)
                 ser.write(messageToSend.encode())
+                print("sent data")
             else:
                 pass
