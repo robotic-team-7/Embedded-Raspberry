@@ -48,14 +48,17 @@ while True:
         ser = serial.Serial(activeserial, 9600, timeout=0.01)
 
         while True:
-            read_data = ser.read(0x100)
-            if(len(read_data) >= 3):
-                print(read_data)
-            if str(read_data) == "b'hit'":
-                messageToSend = "done"
-                takePicture()
-                print(messageToSend)
-                ser.write(messageToSend.encode())
-                print("sent data")
-            else:
-                pass
+            try:
+                read_data = ser.read(0x100)
+                if(len(read_data) >= 3):
+                    print(read_data)
+                if str(read_data) == "b'hit'":
+                    messageToSend = "done"
+                    takePicture()
+                    print(messageToSend)
+                    ser.write(messageToSend.encode())
+                    print("sent data")
+            except:
+                activeserial = 0
+                break
+    time.sleep(0.5)
