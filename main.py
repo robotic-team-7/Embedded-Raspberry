@@ -1,8 +1,10 @@
-import serial
-import sys
 import glob
+import sys
+import time
+import serial
 
 from camera import takePicture
+
 
 def serial_ports():
     if sys.platform.startswith('win'):
@@ -15,12 +17,21 @@ def serial_ports():
         raise EnvironmentError('Unsupported platform')
 
     result = 0
+
+    print(ports) 
+
     for port in ports:
         try:
-            if port.find("usb") != -1 and sys.platform.startswith('darwin'):
-                s = serial.Serial(port)
-                s.close()
-                result = port
+            if sys.platform.startswith('darwin'):
+                if port.find("usb") != -1:
+                    s = serial.Serial(port)
+                    s.close()
+                    result = port
+            elif sys.platform.startswith('linux'):
+                if(port.find("AMA0") == -1 and port.find("printk") == -1):
+                    s = serial.Serial(port)
+                    s.close()
+                    result = port
             else:
                 s = serial.Serial(port)
                 s.close()
@@ -35,7 +46,6 @@ while True:
     if(activeserial != 0):
         print(activeserial)
         ser = serial.Serial(activeserial, 9600, timeout=0.01)
-
 
         while True:
             read_data = ser.read(0x100)

@@ -1,15 +1,13 @@
-import pygame
-import pygame.camera
+import time
+import sys
+if sys.platform.startswith("linux"):
+    from picamera import PiCamera
 
 def takePicture():
-    pygame.camera.init()
-    camlist = pygame.camera.list_cameras()
-
-    if camlist:
-        cam = pygame.camera.Camera(camlist[0], (640, 480))
-        cam.start()
-        image = cam.get_image()
-        pygame.image.save(image, "cameraPicture.jpg")
-    
-    else:
-        print("No camera on current device")
+    if sys.startswith("linux"):
+        camera = PiCamera()
+        camera.resolution = (1280, 720)
+        time.sleep(2)
+        camera.capture("/home/pi/Desktop/intelligenta/Embedded-raspberry/img.jpg")
+        camera.close()
+    print("Picture taken.")
