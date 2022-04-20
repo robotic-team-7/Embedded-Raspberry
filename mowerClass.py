@@ -45,7 +45,7 @@ class mowerClass:
                             self.lidar_serial = RPLidar(port, baudrate=115200, timeout=0.01)
                             print("Connected Lidar.")
                         elif port.find("USB0") != -1:
-                            self.arduino_serial = serial.Serial(port, 9600, timeout = 0.3)
+                            self.arduino_serial = serial.Serial(port, 115200, timeout = 0.3)
                             print("Connected Arduino.")
                         result = 1
 
@@ -53,7 +53,7 @@ class mowerClass:
                     s = serial.Serial()
                     s.close()
                     if port.find("COM3") != -1:
-                        self.arduino_serial = serial.Serial(port, 9600, timeout = 0.3)
+                        self.arduino_serial = serial.Serial(port, 115200, timeout = 0.3)
                         self.arduino_serial.reset_input_buffer()
                         print("Connected Arduino.")
                     elif port.find("COM4") != -1:
