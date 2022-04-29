@@ -1,22 +1,15 @@
-import subprocess
-import glob
-import serial
-import time
+import glob, sys, serial, time, requests
 import socket
 from rplidar import RPLidar
-import requests
 
-#if sys.platform.startswith("linux"):
-    #from picamera import PiCamera
+import command_variable
+
+if sys.platform.startswith("linux"):
+    from picamera import PiCamera
 
 class mowerClass:
     def __init__(self) -> None:
-        #self.lidar_serial = RPLidar()
         self.arduino_serial = 0
-        self.sockC = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-        self.sockC.bind(('B8:27:EB:24:DA:F2', 2))
-        self.sockC.listen(1)
-        self.sockC.settimeout(30)
         self.manual_mode_enabled = True
         #response = requests.get()
     
@@ -55,13 +48,13 @@ class mowerClass:
         self.lidar_serial.reset()
 
         for i, scan in enumerate(self.lidar_serial.iter_measures()):
-            if scan[3] != 0 and (scan[3] < 300 or scan[3] > 600)and (scan[2] <= 30 or scan[2] >= 330):
+            if scan[3] != 0 and (scan[3] < 300 or scan[3] > 600) and (scan[2] <= 30 or scan[2] >= 330):
                 self.lidar_serial.stop()
                 print("Angle: %d, Distance: %d" % (scan[2], scan[3]))    
-            
+
                 self.arduino_serial.write("LT".encode())
                 print("Sent data: LT")
-
+                
                 while True:
 
                     read_data = self.arduino_serial.read(0x100)
@@ -78,32 +71,17 @@ class mowerClass:
     def manual_mode(self):
         self.arduino_serial.write("MM".encode())
         print("Sent data: MM")
-        subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscan'])
-        print("Waiting for connection.")
 
-        try:
-            client, address = self.sockC.accept()
-        except:
-            print("No client tried to connect.")
-            self.manual_mode_enabled = False
-            subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscanoff'])
-            return
-
-        subprocess.call(['sudo', 'hciconfig', 'hci0', 'piscanoff'])
-        print("Connected to address: " + address[0] + " Port: " + str(address[1]))
-
+        last_command = command_variable.command
+        timeout_time = time.time() + (60 * 2)
         while(1):
-            try:
-                data = client.recv(1024)
-                if data:
-                    print("Sent data: " + str(data)[2:len(str(data))-1])
-                    self.arduino_serial.write(str(data)[2:len(str(data))-1].encode())
-                    client.send(data)
-                else:
-                    print("No data available.")
-            except:
-                print("Closing socket. Changing mode to auto.")
-                client.close()
+            if command_variable.command != last_command:
+                self.arduino_serial.write(command_variable.command.encode())
+                print("Sent data: " + command_variable.command)
+                last_command = command_variable.command
+                timeout_time = time.time() + (60 * 2)
+                
+            if timeout_time < time.time():
                 self.manual_mode_enabled = False
                 break
             
