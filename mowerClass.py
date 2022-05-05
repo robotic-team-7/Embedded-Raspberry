@@ -2,11 +2,47 @@ import glob, serial, time, requests, command_variable
 from rplidar import RPLidar
 from picamera import PiCamera
 
+username = "anniemiken" #this is something that we should receive from mobile as a first startup, maybe use sql database to store so only one time needed
+password = "abC!124553"
+
 class mowerClass:
     def __init__(self) -> None:
         self.arduino_serial = 0
-        self.manual_mode_enabled = True
-        #response = requests.get()
+        self.manual_mode_enabled = False
+
+        response = 0
+
+        urlSignIn = "http://ec2-54-227-56-79.compute-1.amazonaws.com:8080/auth/sign-in"
+        headerSignIn = {"Content-Type":"application/json"}
+        dataSignIn = {
+            "username": username,
+            "password": password
+        }
+        print("Requesting data.")
+        try:
+            response = requests.post(urlSignIn, headers= headerSignIn, json= dataSignIn, timeout= 5)    #Authorization
+        except requests.exceptions.Timeout:
+            print("No data.")
+        else:
+            print("Got data.")
+            print(response.status_code)
+            self.accessToken = response.json()['accessToken']
+        
+        urlCreateInstance = "http://ec2-54-227-56-79.compute-1.amazonaws.com:8080/mowing-sessions"
+        headerCreateInstance = {"Content-Type":"application/json", "Authorization":"Bearer " + self.accessToken}
+        dataCreateInstance = {
+            "mowerPositions": [[0,0]],
+            "mowerId": "abc123"
+        }
+        print("Requesting data.")
+        try:
+            response = requests.post(urlCreateInstance, headers= headerCreateInstance, json= dataCreateInstance, timeout= 5)    #Create session
+        except requests.exceptions.Timeout:
+            print("No data.")
+        else:
+            print("Got data.")
+            print(response.status_code)
+            self.mowingSessionID = response.json()
     
     def serial_ports(self):
         ports = glob.glob('/dev/tty[A-Za-z]*')
@@ -36,6 +72,26 @@ class mowerClass:
         camera.capture("/home/raspberrypi/Desktop/Intelligenta-system/img.jpg")
         camera.close()
         print("Picture taken.")
+
+    def update_position(self):
+        urlAddPos = "http://ec2-54-227-56-79.compute-1.amazonaws.com:8080/mowing-sessions"
+        headerAddPos = {"Content-Type":"application/json", "Authorization":"Bearer " + self.accessToken}
+        dataAddPos = {
+            "mowingSessionId": self.mowingSessionID,
+            "newMowerPositions": [[1, 1], [2, 2], [3, 3], [4, 4]]   #has to be updated with our own position data
+        }
+
+        try:
+            response = requests.put(urlAddPos, headers= headerAddPos, json= dataAddPos, timeout= 5)
+        except requests.exceptions.Timeout:
+            print("No data.")
+        else:
+            print("Got data.")
+            print(response.status_code)
+            print(response.json())
+    
+    def upload_image(self):
+        pass
     
     def auto_mode(self):
         self.arduino_serial.write("AM".encode())
@@ -59,8 +115,10 @@ class mowerClass:
                     
                     if str(read_data) == "b'LOK'":
                         self.takePicture()
+                        self.upload_image()
                         self.lidar_serial.start()
                         break
+
             if command_variable.command == "MT":
                 self.manual_mode_enabled = True
                 command_variable.command = 0
@@ -69,7 +127,6 @@ class mowerClass:
                 self.lidar_serial.stop_motor()
                 break
             
-
     def manual_mode(self):
         self.arduino_serial.write("MM".encode())
         print("Sent data: MM")
@@ -89,4 +146,3 @@ class mowerClass:
             if timeout_time < time.time():
                 self.manual_mode_enabled = False
                 break
-            
