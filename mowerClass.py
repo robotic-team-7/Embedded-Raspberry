@@ -1,11 +1,6 @@
-import glob, sys, serial, time, requests
-import socket
+import glob, serial, time, requests, command_variable
 from rplidar import RPLidar
-
-import command_variable
-
-if sys.platform.startswith("linux"):
-    from picamera import PiCamera
+from picamera import PiCamera
 
 class mowerClass:
     def __init__(self) -> None:
@@ -38,7 +33,7 @@ class mowerClass:
         camera = PiCamera()
         camera.resolution = (1280, 720)
         time.sleep(2)
-        camera.capture("/home/pi/Desktop/Intelligenta-system/img.jpg")
+        camera.capture("/home/raspberrypi/Desktop/Intelligenta-system/img.jpg")
         camera.close()
         print("Picture taken.")
     
@@ -63,22 +58,32 @@ class mowerClass:
                         print("Recieved: " + str(read_data))
                     
                     if str(read_data) == "b'LOK'":
-                        #self.takePicture()
+                        self.takePicture()
                         self.lidar_serial.start()
                         break
-
+            if command_variable.command == "MT":
+                self.manual_mode_enabled = True
+                command_variable.command = 0
+                self.lidar_serial.clean_input()
+                self.lidar_serial.stop()
+                self.lidar_serial.stop_motor()
+                break
+            
 
     def manual_mode(self):
         self.arduino_serial.write("MM".encode())
         print("Sent data: MM")
 
-        last_command = command_variable.command
         timeout_time = time.time() + (60 * 2)
         while(1):
-            if command_variable.command != last_command:
+            if command_variable.command != 0:
+                if command_variable.command == "MT":
+                    self.manual_mode_enabled = False
+                    command_variable.command = 0
+                    break
                 self.arduino_serial.write(command_variable.command.encode())
                 print("Sent data: " + command_variable.command)
-                last_command = command_variable.command
+                command_variable.command = 0
                 timeout_time = time.time() + (60 * 2)
                 
             if timeout_time < time.time():
