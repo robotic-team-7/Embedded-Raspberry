@@ -23,6 +23,7 @@ class TxCharacteristic(Characteristic):
         Characteristic.__init__(self, bus, index, UART_TX_CHARACTERISTIC_UUID,
                                 ['notify'], service)
         self.notifying = False
+        
         GLib.io_add_watch(sys.stdin, GLib.IO_IN, self.on_console_input)
 
     def on_console_input(self, fd, condition):
