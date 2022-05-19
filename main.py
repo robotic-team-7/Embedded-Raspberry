@@ -1,64 +1,25 @@
-import glob
-import sys
+import threading
 import time
-import serial
+from command_variable import initialize
+from BLE_BLUEZ.BLE_funcs import BLE
+from mowerClass import mowerClass, lidarSerial
 
-from camera import takePicture
+mower = mowerClass()
+initialize() #initializing global variable for commands sent with BLE
 
+bt_thread = threading.Thread(target=BLE)
+bt_thread.start()
 
-def serial_ports():
-    if sys.platform.startswith('win'):
-        ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        ports = glob.glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
-    else:
-        raise EnvironmentError('Unsupported platform')
+lidar = threading.Thread(target=lidarSerial)
+lidar.start()
 
-    result = 0
+time.sleep(1)
 
-    print(ports) 
-
-    for port in ports:
-        try:
-            if sys.platform.startswith('darwin'):
-                if port.find("usb") != -1:
-                    s = serial.Serial(port)
-                    s.close()
-                    result = port
-            elif sys.platform.startswith('linux'):
-                if(port.find("AMA0") == -1 and port.find("printk") == -1):
-                    s = serial.Serial(port)
-                    s.close()
-                    result = port
-            else:
-                s = serial.Serial(port)
-                s.close()
-                result = port
-        except:
-            pass
-    return result
+active_serial = mower.serial_ports()
+time.sleep(2)
 
 while True:
-    activeserial = serial_ports()
-
-    if(activeserial != 0):
-        print(activeserial)
-        ser = serial.Serial(activeserial, 9600, timeout=0.01)
-
-        while True:
-            try:
-                read_data = ser.read(0x100)
-                if(len(read_data) >= 3):
-                    print(read_data)
-                if str(read_data) == "b'hit'":
-                    messageToSend = "done"
-                    takePicture()
-                    print(messageToSend)
-                    ser.write(messageToSend.encode())
-                    print("sent data")
-            except:
-                activeserial = 0
-                break
-    time.sleep(0.5)
+    if mower.manual_mode_enabled:
+        mower.manual_mode()
+    else:
+        mower.auto_mode()
