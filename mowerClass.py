@@ -1,5 +1,6 @@
 import glob
 import time
+from click import command
 import requests
 import serial
 from picamera import PiCamera
@@ -62,13 +63,18 @@ class mowerClass:
 
         for port in ports:
             try:
-                if(port.find("AMA0") == -1 and port.find("printk") == -1 and port.find("USB0") == -1):
-                    s = serial.Serial(port)
-                    s.close()
+                if not command_variable.wrongPort:
+                    if(port.find("AMA0") == -1 and port.find("printk") == -1 and port.find("USB0") == -1):
+                        s = serial.Serial(port)
+                        s.close()
 
-                    if port.find("USB1") != -1:
-                        self.arduino_serial = serial.Serial(port, baudrate=115200, timeout=0.3)
-                        print("Connected Arduino.")
+                        if port.find("USB1") != -1:
+                            self.arduino_serial = serial.Serial(port, baudrate=115200, timeout=0.3)
+                            print("Connected Arduino.")
+                else:
+                    self.arduino_serial = serial.Serial("/dev/ttyUSB0", baudrate=115200, timeout=0.3)
+                    print("Connected Arduino.")
+                    break
             except:
                 pass
 
@@ -80,7 +86,6 @@ class mowerClass:
         camera.close()
         print("Picture taken.")
 
-
     def update_position(self):
         urlAddPos = "http://{}:8080/mowing-sessions".format(url)
         headerAddPos = {"Content-Type":"application/json", "Authorization":"Bearer " + self.accessToken}
@@ -89,7 +94,7 @@ class mowerClass:
 
         dataAddPos = {
             "mowingSessionId": self.mowingSessionID,
-            "newMowerPositions": self.positions   #has to be updated with our own position data
+            "newMowerPositions": self.positions  
         }
 
         try:
@@ -183,7 +188,6 @@ class mowerClass:
                         sent_picture = False
                         break
         
-                #time.sleep(0.2)
                 command_variable.lidar_hit = False
                 command_variable.lidar_stup = False
           
@@ -235,18 +239,25 @@ def lidarSerial():
                 s.close()
 
                 if port.find("USB0") != -1:
-                    lidar_serial = RPLidar(port)
-                    print("Connected Lidar.")
+                        lidar_serial = RPLidar(port)
+                        print("Connected Lidar.")
         except:
             pass
 
     lidar_serial.reset()
    
     while True:
-        for i, scan in enumerate(lidar_serial.iter_measures()):
-            if command_variable.lidar_hit == False:
-                #if scan[3] != 0 and (scan[3] < 300 or scan[3] > 600) and (scan[2] <= 30 or scan[2] >= 330):
-                if scan[3] != 0 and scan[3] < 300 and (scan[2] <= 30 or scan[2] >= 330):
-                    command_variable.lidar_hit = True
-                    #if scan[3] > 600:
-                        #command_variable.lidar_stup = True
+        try:
+            for i, scan in enumerate(lidar_serial.iter_measures()):
+                if command_variable.lidar_hit == False:
+                    #if scan[3] != 0 and (scan[3] < 300 or scan[3] > 600) and (scan[2] <= 30 or scan[2] >= 330):     #If case for precipice
+                    if scan[3] != 0 and scan[3] < 300 and (scan[2] <= 30 or scan[2] >= 330):
+                        command_variable.lidar_hit = True
+                        #if scan[3] > 600:                                                                           #If case for precipice
+                            #command_variable.lidar_stup = True
+        except:
+            print("Wrong port for lidar.")
+            command_variable.wrongPort = True
+            lidar_serial = RPLidar("/dev/ttyUSB1")
+            lidar_serial.reset()
+            print("Connected Lidar.")

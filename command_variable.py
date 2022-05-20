@@ -5,3 +5,5 @@ def initialize():
     lidar_hit = False
     global lidar_stup
     lidar_stup = False
+    global wrongPort
+    wrongPort = False

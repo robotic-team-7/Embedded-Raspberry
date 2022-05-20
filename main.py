@@ -1,5 +1,6 @@
 import threading
 import time
+import command_variable
 from command_variable import initialize
 from BLE_BLUEZ.BLE_funcs import BLE
 from mowerClass import mowerClass, lidarSerial
@@ -13,9 +14,9 @@ bt_thread.start()
 lidar = threading.Thread(target=lidarSerial)
 lidar.start()
 
-time.sleep(1)
+time.sleep(4)
 
-active_serial = mower.serial_ports()
+mower.serial_ports()
 time.sleep(2)
 
 while True:
