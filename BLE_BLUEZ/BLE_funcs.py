@@ -141,6 +141,3 @@ def BLE():
         mainloop.run()
     except KeyboardInterrupt:
         adv.Release()
-
-if __name__ == '__main__':
-    BLE()

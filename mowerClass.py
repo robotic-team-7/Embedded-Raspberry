@@ -1,6 +1,5 @@
 import glob
 import time
-from click import command
 import requests
 import serial
 from picamera import PiCamera

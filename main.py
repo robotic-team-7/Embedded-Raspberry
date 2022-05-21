@@ -1,6 +1,5 @@
 import threading
 import time
-import command_variable
 from command_variable import initialize
 from BLE_BLUEZ.BLE_funcs import BLE
 from mowerClass import mowerClass, lidarSerial
