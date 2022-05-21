@@ -171,7 +171,7 @@ class mowerClass:
                         
                         if str(read_data) == "LOK":
                             if command_variable.lidar_stup == False:
-                                self.takePicture()
+                                self.take_picture()
                                 self.arduino_serial.write("PT".encode())
                                 print("Sent data: PT")
                                 self.upload_image()
