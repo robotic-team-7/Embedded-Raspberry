@@ -11,7 +11,7 @@ password = "abC!124553"
 
 url = 'ec2-54-227-56-79.compute-1.amazonaws.com'
 class mowerClass:
-    def __init__(self) -> None:
+    def __init__(self):
         self.arduino_serial = 0
         self.manual_mode_enabled = False
 
