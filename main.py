@@ -2,7 +2,7 @@ import threading
 import time
 from command_variable import initialize
 from BLE_BLUEZ.BLE_funcs import BLE
-from mowerClass import mowerClass, lidarSerial
+from mowerClass import mowerClass, lidar_serial
 
 mower = mowerClass()
 initialize() #initializing global variable for commands sent with BLE
@@ -10,7 +10,7 @@ initialize() #initializing global variable for commands sent with BLE
 bt_thread = threading.Thread(target=BLE)
 bt_thread.start()
 
-lidar = threading.Thread(target=lidarSerial)
+lidar = threading.Thread(target=lidar_serial)
 lidar.start()
 
 time.sleep(4)
