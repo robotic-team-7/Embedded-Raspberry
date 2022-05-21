@@ -1,7 +1,7 @@
-# The mower: Raspberry
+# The mower: Raspberry Pi
 
 ## Technology
-The Raspberry incorperates some open source libraries, provided by Python and/or installed libraries, in order to work properly:
+The Raspberry Pi incorperates some open source libraries, provided by Python and/or installed libraries, in order to work properly:
 
 - [Threading](https://github.com/python/cpython/blob/3.10/Lib/threading.py)
 - Time
@@ -11,9 +11,9 @@ The Raspberry incorperates some open source libraries, provided by Python and/or
 - [Picamera](https://github.com/waveform80/picamera)
 - [Rplidar](https://github.com/Roboticia/RPLidar)
 
-The BLE advertising server (BLE_funcs.py file) for the Raspberry PI was created from an example that can be found [here](https://scribles.net/creating-ble-gatt-server-uart-service-on-raspberry-pi/), this code takes advantage of BLUEZ own advertisement and gatt server example. The code was modified to a small degreee to fit with the rest of the code as intended.
+The BLE advertising server (BLE_funcs.py file) for the Raspberry Pi was created from an example that can be found [here](https://scribles.net/creating-ble-gatt-server-uart-service-on-raspberry-pi/), this code takes advantage of BLUEZ own advertisement and gatt server example. The code was modified to a small degreee to fit with the rest of the code as intended.
 
-For the program to start up with the boot of the Raspberry PI the Rplidar library had to be moved to the work folder.
+For the program to start up with the boot of the Raspberry Pi the Rplidar library had to be moved to the work folder.
 
 ## Serial communication messages
 | During state      | Message    | Incoming/outgoing | Description |
