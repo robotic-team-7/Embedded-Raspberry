@@ -4,7 +4,7 @@
 The Raspberry incorperates some open source libraries, provided by Python and/or installed libraries, in order to work properly:
 
 - [Threading](https://github.com/python/cpython/blob/3.10/Lib/threading.py)
-- [Time]()
+- Time
 - [Glob](https://github.com/python/cpython/blob/3.10/Lib/glob.py)
 - [Requests](https://github.com/psf/requests)
 - [Serial](https://github.com/pyserial/pyserial)
