@@ -77,7 +77,7 @@ class mowerClass:
             except:
                 pass
 
-    def takePicture(self):
+    def take_picture(self):
         camera = PiCamera()
         camera.resolution = (1280, 720)
         time.sleep(1)
@@ -227,7 +227,7 @@ class mowerClass:
                     print(self.positions)
                     self.positions.clear()
 
-def lidarSerial():
+def lidar_serial():
     ports = glob.glob('/dev/tty[A-Za-z]*')
     lidar_serial = 0
 
